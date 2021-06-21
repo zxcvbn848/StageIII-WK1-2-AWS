@@ -2,6 +2,9 @@
 const uploadForm = document.getElementById('upload-form');
 // main
 const mainElement = document.querySelector('main');
+// goTop & goBottom
+const goTop = document.querySelector('#goTop'); 
+const goBottom = document.querySelector('#goBottom'); 
 
 // indexModels
 let indexModels = {
@@ -45,7 +48,7 @@ let indexViews = {
          parent.removeChild(parent.firstChild);
       }
    },
-   render: function() {
+   renderAll: function() {
       if (!indexModels.uploadDataArray) return;
 
       for (let upload of indexModels.uploadDataArray) {
@@ -102,15 +105,18 @@ let indexViews = {
       spinner.appendChild(spinnerSectorGreen);
       element.appendChild(spinner);
    },
-   uploadPost: function() {
-      const upload = indexModels.uploadData;
-
+   renderOne: function() {
       const resultArea = document.createElement('div')
       resultArea.classList.add('result-area');
 
       this.createLoadingElement(resultArea);
 
       mainElement.appendChild(resultArea);
+
+      return resultArea;
+   },
+   uploadPost: function(resultArea) {
+      const upload = indexModels.uploadData;
 
       const textElement = document.createElement('div');
       textElement.classList.add('text')
@@ -135,18 +141,26 @@ let indexViews = {
 let indexControllers = {
    init: function() {
       indexModels.fetchGetUploadAPI()
-         .then(() => indexViews.render())
+         .then(() => indexViews.renderAll())
          .then(() => indexModels.uploadDataArray = null)
          .catch(err => console.log(err));
    },
    upload: function() {
+      const resultArea = indexViews.renderOne();
+
       window.scrollTo(0, document.body.scrollHeight);
 
       indexModels.fetchPostUploadAPI()
-         .then(() => indexViews.uploadPost())
+         .then(() => indexViews.uploadPost(resultArea))
          .then(() => indexModels.uploadData = null)
          .catch(err => console.log(err));
-   }
+   },
+   goTop: function() {
+      window.scrollTo(0, 0);
+   },
+   goBottom: function() {
+      window.scrollTo(0, document.body.scrollHeight);
+   },
 };
 
 indexControllers.init();
@@ -155,4 +169,15 @@ uploadForm.addEventListener('submit', e => {
    e.preventDefault();
 
    indexControllers.upload();
+});
+
+goTop.addEventListener('click', e => {
+   e.preventDefault();
+
+   indexControllers.goTop();
+});
+goBottom.addEventListener('click', e => {
+   e.preventDefault();
+
+   indexControllers.goBottom();
 });

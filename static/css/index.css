@@ -150,12 +150,40 @@ main .result-area .image img {
    height: 100%;
 }
 
-.goTop {
+ul {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+
    position: fixed;
    right: 5%;
    bottom: 20px;
 
+   padding: 0;
+}
+ul li {
+   list-style: none;
+   text-align: center;
+
+   width: 100%;
+   
+   margin: 10px;
+}
+ul li button {
+   width: 100%;
+
+   border: 1px solid black;
+   border-radius: 10px;
+   outline: none;
+   background: none;
+
    color: black;
+}
+ul li button:hover {
+   cursor: pointer;
+   background-color: blue;
+   color: white;
 }
 /* 
 hr {
