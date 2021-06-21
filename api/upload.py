@@ -12,6 +12,27 @@ from config import *
 
 api_upload = Blueprint('api_upload', __name__)
 
+@api_upload.route("/upload", methods=["GET"])
+def getUpload(): 
+	try:
+		postList = selectPosts()
+
+		dataList = []
+
+		if postList:
+			for post in postList:
+				data = {
+					"text": post["description"],
+					"image_url": post["image_url"]
+				}
+				dataList.append(data)
+			return jsonify({ "data": dataList })
+		else:
+			return jsonify({ "data": None })	
+	except Exception as e:
+		logging.error(e)
+		return jsonify({ "error": True, "message": "伺服器內部錯誤" })
+
 @api_upload.route("/upload", methods=["POST"])
 def postUpload(): 
 	try:
@@ -41,9 +62,7 @@ def postUpload():
 				"text": selectedPost["description"],
 				"image_url": selectedPost["image_url"]
 			}
-
-			if data["text"] and data["image_url"]:
-				return jsonify({ "data": data })
+			return jsonify({ "data": data })
 		else:
 			return jsonify({ "data": None })	
 	except Exception as e:

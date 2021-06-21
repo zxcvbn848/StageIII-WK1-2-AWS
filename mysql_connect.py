@@ -24,6 +24,35 @@ def closePool(connection_object, cursor):
       connection_object.close()    
 # ====================
 # for /api/upload
+def selectPosts():
+   try:
+      sql_cmd = """
+               SELECT *
+               FROM posts
+               """
+
+      connection_object = connection_pool.get_connection()
+
+      if connection_object.is_connected():
+         cursor = connection_object.cursor()
+         cursor.execute(sql_cmd)
+         results = cursor.fetchall()      
+
+      dataList = []
+
+      if results:
+         for result in results:
+            data = dict(zip(cursor.column_names, result))
+            dataList.append(data)
+         return dataList
+      else:
+         return None
+   except Exception as e:
+      print(e)
+      return None
+   finally:
+      closePool(connection_object, cursor)   
+
 def selectPost(**kwargs):
    try:
       sql_cmd = """

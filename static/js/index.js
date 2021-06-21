@@ -5,7 +5,21 @@ const mainElement = document.querySelector('main');
 
 // indexModels
 let indexModels = {
-   uploadData: {},
+   uploadDataArray: null,
+   uploadData: null,
+   fetchGetUploadAPI: function() {
+      const text = uploadForm.querySelector('#uploadText').value;
+
+      const src = '/api/upload';
+
+      const postUploadForm = new FormData();
+      postUploadForm.append('text', text);
+      postUploadForm.append('image', uploadForm.querySelector('#uploadImage').files[0]);
+
+      return fetch(src)
+         .then(response => response.json())
+         .then(result => this.uploadDataArray = result.data);
+   },
    fetchPostUploadAPI: function() {
       const text = uploadForm.querySelector('#uploadText').value;
 
@@ -32,24 +46,27 @@ let indexViews = {
       }
    },
    render: function() {
-      const resultArea = document.createElement('div')
-      resultArea.classList.add('result-area');
+      if (!indexModels.uploadDataArray) return;
 
-      this.createLoadingElement(resultArea);
-
-      mainElement.appendChild(resultArea);
-
-      return resultArea;
+      for (let upload of indexModels.uploadDataArray) {
+         const resultArea = document.createElement('div')
+         resultArea.classList.add('result-area');
+   
+         this.createLoadingElement(resultArea);
+         this.showData(resultArea, upload);
+   
+         mainElement.appendChild(resultArea);
+      }
    },
-   showData: function(resultArea) {
+   showData: function(resultArea, upload) {
       const textElement = document.createElement('div');
       textElement.classList.add('text')
-      textElement.textContent = indexModels.uploadData['text'];
+      textElement.textContent = upload['text'];
 
       const imageElement = document.createElement('div');
       imageElement.classList.add('image');
       const img = document.createElement('img');
-      img.src = indexModels.uploadData['image_url'];
+      img.src = upload['image_url'];
       img.onload = function() {
          resultArea.removeChild(resultArea.querySelector('.spinner'));
       };
@@ -84,20 +101,55 @@ let indexViews = {
       spinner.appendChild(spinnerSectorBlue);
       spinner.appendChild(spinnerSectorGreen);
       element.appendChild(spinner);
+   },
+   uploadPost: function() {
+      const upload = indexModels.uploadData;
+
+      const resultArea = document.createElement('div')
+      resultArea.classList.add('result-area');
+
+      this.createLoadingElement(resultArea);
+
+      mainElement.appendChild(resultArea);
+
+      const textElement = document.createElement('div');
+      textElement.classList.add('text')
+      textElement.textContent = upload['text'];
+
+      const imageElement = document.createElement('div');
+      imageElement.classList.add('image');
+      const img = document.createElement('img');
+      img.src = upload['image_url'];
+      img.onload = function() {
+         resultArea.removeChild(resultArea.querySelector('.spinner'));
+      };
+
+      imageElement.appendChild(img);
+
+      resultArea.appendChild(textElement);
+      resultArea.appendChild(imageElement);
    }
 };
 
 // indexControllers
 let indexControllers = {
+   init: function() {
+      indexModels.fetchGetUploadAPI()
+         .then(() => indexViews.render())
+         .then(() => indexModels.uploadDataArray = null)
+         .catch(err => console.log(err));
+   },
    upload: function() {
-      const resultArea = indexViews.render();
+      window.scrollTo(0, document.body.scrollHeight);
 
       indexModels.fetchPostUploadAPI()
-         .then(() => indexViews.showData(resultArea))
-         .then(() => indexModels.uploadData = {})
+         .then(() => indexViews.uploadPost())
+         .then(() => indexModels.uploadData = null)
          .catch(err => console.log(err));
    }
 };
+
+indexControllers.init();
 
 uploadForm.addEventListener('submit', e => {
    e.preventDefault();
